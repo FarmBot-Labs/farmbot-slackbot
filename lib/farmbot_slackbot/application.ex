@@ -40,6 +40,7 @@ defmodule FarmbotSlackbot.Application do
     unless File.exists?("bootstrap_installed") do
       Logger.debug "installing nerves"
       Mix.Tasks.Archive.Install.run ["hex", "nerves_bootstrap", "--force"]
+      Mix.Tasks.Local.Rebar.run ["--force"]
       File.write!("bootstrap_installed", "OK")
     end
     :ok
