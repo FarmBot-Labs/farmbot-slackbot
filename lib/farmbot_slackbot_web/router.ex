@@ -5,6 +5,10 @@ defmodule FarmbotSlackbotWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/", FarmbotSlackbotWeb do
+    get "/", RootController, :index
+  end
+
   scope "/api", FarmbotSlackbotWeb do
     pipe_through :api
   end
