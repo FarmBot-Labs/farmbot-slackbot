@@ -22,6 +22,8 @@ config :farmbot_slackbot, FarmbotSlackbotWeb.Endpoint,
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :farmbot_slackbot, :work_dir, "/app/"
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key

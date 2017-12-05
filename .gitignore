@@ -17,3 +17,4 @@ erl_crash.dump
 env
 bootstrap_installed
 fwup_installed
+work

@@ -18,7 +18,7 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
-
+config :farmbot_slackbot, :work_dir, "/tmp/"
 config :ex_slack, :token, Map.fetch!(System.get_env(), "SLACK_API_TOKEN")
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

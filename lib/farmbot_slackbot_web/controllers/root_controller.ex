@@ -1,7 +1,7 @@
 defmodule FarmbotSlackbotWeb.RootController do
   use FarmbotSlackbotWeb, :controller
 
-  @work_dir Path.join(Application.app_dir(:farmbot_slackbot), "work")
+  Application.get_env(:farmbot_slackbot, :work_dir)
 
   def index(conn, _) do
     send_resp(conn, 200, "Hello")

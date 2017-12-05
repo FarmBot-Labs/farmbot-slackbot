@@ -1,7 +1,7 @@
 defmodule FarmbotSlackbot.FirmwareBuilder do
   require Logger
 
-  @work_dir Path.join(Application.app_dir(:farmbot_slackbot), "work")
+  Application.get_env(:farmbot_slackbot, :work_dir)
 
   def full_build(commit \\ "staging") do
     Logger.debug "Doing full build"

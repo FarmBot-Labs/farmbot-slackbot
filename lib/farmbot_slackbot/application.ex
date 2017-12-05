@@ -2,13 +2,14 @@ defmodule FarmbotSlackbot.Application do
   use Application
   require Logger
 
-  @work_dir Path.join(Application.app_dir(:farmbot_slackbot), "work")
+  Application.get_env(:farmbot_slackbot, :work_dir)
 
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   def start(_type, _args) do
     import Supervisor.Spec
     File.mkdir_p @work_dir
+    File.mkdir_p ".nerves"
     install_nerves_bootstrap()
     # install_fwup()
 
