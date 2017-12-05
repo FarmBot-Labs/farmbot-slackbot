@@ -9,3 +9,4 @@ make
 unzip
 cmake
 python
+xz-utils
