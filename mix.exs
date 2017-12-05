@@ -38,7 +38,7 @@ defmodule FarmbotSlackbot.Mixfile do
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 0.13"},
 
-      {:ex_slack, path: "/home/connor/oss/elixir/slack"}
+      {:ex_slack, "~> 0.2.2"}
     ]
   end
 end
