@@ -3,23 +3,30 @@ defmodule FarmbotSlackbot.FirmwareBuilder do
 
   @work_dir Application.get_env(:farmbot_slackbot, :work_dir)
 
-  def full_build(commit \\ "staging") do
+  def full_build(cb, channel, commit \\ "staging") do
     Logger.debug "Doing full build"
     if File.exists?("#{@work_dir}/current_build") do
       raise "Build already in progress"
     end
-    clone(commit)
-    get_deps()
-    build_firmware()
-    upload_firmware()
+    clone(cb, commit)
+    get_deps(cb)
+    build_firmware(cb)
+    upload_firmware(cb, channel)
   rescue
     err ->
       Logger.error "build failed: #{inspect Exception.message(err)}"
       File.rm "#{@work_dir}/current_build"
+
+    send cb, :done
   end
 
-  def clone(commit) do
+  def reset do
+    File.rm "#{@work_dir}/current_build"
+  end
+
+  def clone(cb, commit) do
     Logger.debug "Cloning"
+    send cb, {:clone, :begin}
     if File.exists?("#{@work_dir}/#{commit}") do
       File.rm_rf!("#{@work_dir}/#{commit}")
     end
@@ -29,25 +36,32 @@ defmodule FarmbotSlackbot.FirmwareBuilder do
     Logger.debug "Checking out"
     System.cmd("git", ["checkout", "#{commit}"], opts()) |> check_res()
     File.write!("#{@work_dir}/current_build", commit)
+    send cb, {:clone, :finish}
   end
 
-  def get_deps do
+  def get_deps(cb) do
+    send(cb, {:deps, :begin})
     Logger.debug "mix deps.get"
     File.cd!("#{@work_dir}/#{current_build()}")
     System.cmd("mix", ["deps.get"], opts()) |> check_res()
+    send(cb, {:deps, :finish})
   end
 
-  def build_firmware do
+  def build_firmware(cb) do
+    send(cb, {:firmware, :begin})
     Logger.debug "mix firmware"
     File.cd!("#{@work_dir}/#{current_build()}")
     System.cmd("mix", ["firmware"], opts()) |> check_res()
+    send(cb, {:firmware, :finish})
   end
 
-  def upload_firmware do
+  def upload_firmware(cb, channel) do
+    send(cb, {:upload, :begin})
     Logger.debug "uploading to slack"
     File.cd!("#{@work_dir}/#{current_build()}")
-    System.cmd("mix", ["firmware.slack"], opts()) |> check_res()
+    System.cmd("mix", ["firmware.slack", "--channels", channel], opts()) |> check_res()
     File.rm "#{@work_dir}/current_build"
+    send(cb, {:upload, :finish})
   end
 
   def env do

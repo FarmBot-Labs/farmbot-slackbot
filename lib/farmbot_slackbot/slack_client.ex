@@ -12,19 +12,77 @@ defmodule FarmbotSlackbot.SlackClient do
 
   def init([]) do
     {:ok, pid} = Slack.RtmApi.start_link()
-    Logger.info "Connected to slack"
-    {:ok, %{rtm: pid}}
+    FarmbotSlackbot.FirmwareBuilder.reset()
+    {:ok, %{rtm: pid, build: false, thread_ts: nil}}
   end
 
-  def handle_info({:slack_rtm, type, data}, state) do
-    Logger.info "Got slack #{type} message: #{inspect data}"
+  def handle_info({:slack_rtm, "message", %{"text" => "<@U6D01KPEE> " <> text} = message}, state) do
+    state = handle_message(text, message, state)
     {:noreply, state}
+  end
+
+  def handle_info({:slack_rtm, _type, _data}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info({step, stage}, state) do
+    if state.thread_ts do
+      reply = %{channel: state.build, type: "message", text: "build step *#{step}* => *#{stage}*", thread_ts: state.thread_ts}
+      Slack.RtmApi.reply(state.rtm, reply)
+    end
+    {:noreply, state}
+  end
+
+  def handle_info(:done, state) do
+    {:noreply, %{state | build: false, thread_ts: nil}}
   end
 
   def terminate(reason, state) do
     if state.rtm do
+      if state.build do
+        reply = %{channel: state.build, type: "message", text: "build failed!", thread_ts: state.thread_ts}
+        Slack.RtmApi.reply(state.rtm, reply)
+      end
+
       Logger.debug "Disconnecting from Slack."
       Slack.RtmApi.stop(state.rtm, reason)
     end
+
+  end
+
+  defp handle_message("build " <> commit_or_branch, message, state) do
+    reply = Map.take(message, ["channel"])
+      |> Map.put("type", "message")
+
+    if state.build do
+
+      reply = Map.put(reply, "text", "Build in progress already!")
+      Slack.RtmApi.reply(state.rtm, reply)
+      state
+
+    else
+      case FarmbotSlackbot.GitHub.get "/repos/farmbot/farmbot_os/commits?sha=#{commit_or_branch}" do
+        {:ok, %{status_code: 200}} ->
+          reply = Map.put(reply, "text", "Going to  build: https://github.com/farmbot/farmbot_os/tree/#{commit_or_branch}") |> Map.put("thread_ts", message["ts"])
+          callback_pid = self()
+          spawn_link FarmbotSlackbot.FirmwareBuilder, :full_build, [callback_pid, message["channel"], commit_or_branch]
+          Slack.RtmApi.reply(state.rtm, reply)
+          %{state | build: message["channel"], thread_ts: message["ts"]}
+
+        _ ->
+          reply = Map.put(reply, "text", "Could not find commit: #{commit_or_branch}")
+          Slack.RtmApi.reply(state.rtm, reply)
+          state
+      end
+    end
+
+  end
+
+  defp handle_message(text, message, state) do
+    reply = Map.take(message, ["channel"])
+      |> Map.put("type", "message")
+      |> Map.put("text", text)
+    Slack.RtmApi.reply(state.rtm, reply)
+    state
   end
 end

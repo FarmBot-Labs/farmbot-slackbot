@@ -16,7 +16,7 @@ defmodule FarmbotSlackbot.Application do
       # worker(Task, [__MODULE__, :install_nerves_bootstrap, []]),
       # Start the endpoint when the application starts
       supervisor(FarmbotSlackbotWeb.Endpoint, []),
-      # worker(FarmbotSlackbot.SlackClient, []),
+      worker(FarmbotSlackbot.SlackClient, []),
       # Start your own worker by calling: FarmbotSlackbot.Worker.start_link(arg1, arg2, arg3)
       # worker(FarmbotSlackbot.Worker, [arg1, arg2, arg3]),
     ]

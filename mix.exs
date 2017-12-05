@@ -36,8 +36,9 @@ defmodule FarmbotSlackbot.Mixfile do
       {:phoenix_pubsub, "~> 1.0"},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
+      {:httpoison, "~> 0.13"},
 
-      {:ex_slack, "~> 0.2.1"}
+      {:ex_slack, path: "/home/connor/oss/elixir/slack"}
     ]
   end
 end
