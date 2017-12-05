@@ -2,7 +2,7 @@ defmodule FarmbotSlackbot.Application do
   use Application
   require Logger
 
-  Application.get_env(:farmbot_slackbot, :work_dir)
+  @work_dir Application.get_env(:farmbot_slackbot, :work_dir)
 
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications

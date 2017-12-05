@@ -1,7 +1,7 @@
 defmodule FarmbotSlackbotWeb.RootController do
   use FarmbotSlackbotWeb, :controller
 
-  Application.get_env(:farmbot_slackbot, :work_dir)
+  @work_dir Application.get_env(:farmbot_slackbot, :work_dir)
 
   def index(conn, _) do
     send_resp(conn, 200, "Hello")
