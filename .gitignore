@@ -16,3 +16,4 @@ erl_crash.dump
 /config/*.secret.exs
 env
 bootstrap_installed
+fwup_installed
