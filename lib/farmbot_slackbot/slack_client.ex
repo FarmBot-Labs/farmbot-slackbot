@@ -13,7 +13,18 @@ defmodule FarmbotSlackbot.SlackClient do
   def init([]) do
     {:ok, pid} = Slack.RtmApi.start_link()
     FarmbotSlackbot.FirmwareBuilder.reset()
+    Process.send_after(self(), :reconnect, 45_000)
+    Slack.RpcApi.Users.setPresence "auto"
     {:ok, %{rtm: pid, build: false, thread_ts: nil}}
+  end
+
+  def handle_info(:reconnect, %{build: build} = state) when is_binary(build) do
+    Process.send_after(self(), :reconnect, 5_000)
+    {:noreply, state}
+  end
+
+  def handle_info(:reconnect, state) do
+    {:stop, :restart, state}
   end
 
   def handle_info({:slack_rtm, "message", %{"text" => "<@U6D01KPEE> " <> text} = message}, state) do
@@ -53,6 +64,7 @@ defmodule FarmbotSlackbot.SlackClient do
       end
 
       Logger.debug "Disconnecting from Slack."
+      Slack.RpcApi.Users.setPresence "away"
       Slack.RtmApi.stop(state.rtm, reason)
     end
 
@@ -89,8 +101,13 @@ defmodule FarmbotSlackbot.SlackClient do
   defp handle_message(text, message, state) do
     reply = Map.take(message, ["channel"])
       |> Map.put("type", "message")
-      |> Map.put("text", text)
+      |> Map.put("text", format_text(text))
     Slack.RtmApi.reply(state.rtm, reply)
     state
+  end
+
+  defp format_text(text) do
+    text
+    |> String.replace("you", "_*you*_")
   end
 end
