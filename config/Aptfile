@@ -1,0 +1,11 @@
+squashfs-tools
+git
+g++
+libssl-dev
+libncurses5-dev
+bc
+m4
+make
+unzip
+cmake
+python
