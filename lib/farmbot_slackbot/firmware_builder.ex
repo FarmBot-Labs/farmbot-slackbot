@@ -16,6 +16,7 @@ defmodule FarmbotSlackbot.FirmwareBuilder do
     err ->
       Logger.error "build failed: #{inspect Exception.message(err)}"
       File.rm "#{@work_dir}/current_build"
+      send cb, :error
 
     send cb, :done
   end

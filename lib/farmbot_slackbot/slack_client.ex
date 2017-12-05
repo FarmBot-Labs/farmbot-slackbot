@@ -33,6 +33,14 @@ defmodule FarmbotSlackbot.SlackClient do
     {:noreply, state}
   end
 
+  def handle_info(:error, state) do
+    if state.thread_ts do
+      reply = %{channel: state.build, type: "message", text: "build failed", thread_ts: state.thread_ts}
+      Slack.RtmApi.reply(state.rtm, reply)
+    end
+    {:noreply, %{state | build: false, thread_ts: nil}}
+  end
+
   def handle_info(:done, state) do
     {:noreply, %{state | build: false, thread_ts: nil}}
   end
