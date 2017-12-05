@@ -5,11 +5,14 @@ defmodule FarmbotSlackbot.Application do
   # for more information on OTP Applications
   def start(_type, _args) do
     import Supervisor.Spec
+    install_nerves_bootstrap()
 
     # Define workers and child supervisors to be supervised
     children = [
+      # worker(Task, [__MODULE__, :install_nerves_bootstrap, []]),
       # Start the endpoint when the application starts
       supervisor(FarmbotSlackbotWeb.Endpoint, []),
+      # worker(FarmbotSlackbot.SlackClient, []),
       # Start your own worker by calling: FarmbotSlackbot.Worker.start_link(arg1, arg2, arg3)
       # worker(FarmbotSlackbot.Worker, [arg1, arg2, arg3]),
     ]
@@ -24,6 +27,14 @@ defmodule FarmbotSlackbot.Application do
   # whenever the application is updated.
   def config_change(changed, _new, removed) do
     FarmbotSlackbotWeb.Endpoint.config_change(changed, removed)
+    :ok
+  end
+
+  def install_nerves_bootstrap do
+    unless File.exists?("bootstrap_installed") do
+      Mix.Tasks.Archive.Install.run ["hex", "nerves_bootstrap", "--force"]
+      File.write!("bootstrap_installed", "OK")
+    end
     :ok
   end
 end

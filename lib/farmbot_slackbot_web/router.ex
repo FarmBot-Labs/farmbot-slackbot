@@ -7,6 +7,7 @@ defmodule FarmbotSlackbotWeb.Router do
 
   scope "/", FarmbotSlackbotWeb do
     get "/", RootController, :index
+    get "/test", RootController, :test
   end
 
   scope "/api", FarmbotSlackbotWeb do
