@@ -9,9 +9,7 @@ defmodule FarmbotSlackbot.Application do
   def start(_type, _args) do
     import Supervisor.Spec
     File.mkdir_p @work_dir
-    File.mkdir_p ".nerves"
     install_nerves_bootstrap()
-    # install_fwup()
 
     # Define workers and child supervisors to be supervised
     children = [
@@ -46,14 +44,4 @@ defmodule FarmbotSlackbot.Application do
     :ok
   end
 
-  # @fwup_dl_url "https://github.com/fhunleth/fwup/releases/download/v0.18.1/fwup_0.18.1_amd64.deb" |> to_charlist()
-  #
-  # def install_fwup do
-  #   unless File.exists?("fwup_installed!") do
-  #     Logger.debug "installing fwup"
-  #     {:ok, {{_, 200, _}, _, bin}} = :httpc.request(:get, {@fwup_dl_url, []}, [{:autoredirect, true}, {:body_format, :binary}], [{:autoredirect, true}, {:body_format, :binary}])
-  #     File.write!("/tmp/fwup_0.18.1_amd64.deb", bin)
-  #     require IEx; IEx.pry
-  #   end
-  # end
 end

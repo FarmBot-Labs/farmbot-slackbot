@@ -10,3 +10,11 @@ unzip
 cmake
 python
 xz-utils
+build-essential
+autoconf
+pkg-config
+libtool
+mtools
+unzip
+zip
+help2man
