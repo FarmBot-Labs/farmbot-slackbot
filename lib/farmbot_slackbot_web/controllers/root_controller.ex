@@ -6,7 +6,12 @@ defmodule FarmbotSlackbotWeb.RootController do
   end
 
   def test(conn, _) do
-    spawn FarmbotSlackbot.FirmwareBuilder, :full_build, ["staging"]
-    send_resp(conn, 200, "Building")
+    case File.exists?("/tmp/current_build") do
+      true ->
+        send_resp conn, 500, "Build already running: #{File.read!("/tmp/current_build")}"
+      false ->
+        spawn FarmbotSlackbot.FirmwareBuilder, :full_build, ["staging"]
+        send_resp(conn, 200, "Building")
+    end
   end
 end
